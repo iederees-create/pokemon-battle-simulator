@@ -8,8 +8,26 @@
 </head>
 <body>
     <h1>Pokémon Battle Simulator</h1>
-    
-    <div id="pokemon-container"></div>
+    <div id="pokemon-container">
+        <!-- Pokémon selection and battle will be shown here -->
+    </div>
+
+    <div class="battle-pokemon">
+        <div id="player">
+            <h2>Player's Pokémon</h2>
+            <div id="player-card" class="pokemon-card">
+                <!-- Player's Pokémon will be displayed here -->
+            </div>
+        </div>
+        <div id="enemy">
+            <h2>Enemy's Pokémon</h2>
+            <div id="enemy-card" class="pokemon-card">
+                <!-- Enemy's Pokémon will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <button id="attack-btn">Attack!</button>
 
     <script src="js/pokemon.js"></script>
     <script src="js/script.js"></script>
