@@ -1,43 +1,38 @@
-// script.js - Initialize Pokémon and battle flow
+// script.js - Handle battle interactions
 
-// Define basic Pokémon structure (including types, moves, etc.)
-const pokemonData = {
-   "Pikachu": {
-       name: "Pikachu",
-       type: "Electric",
-       hp: 100,
-       attack: 10,
-       speed: 8,
-       moves: ["Growl", "Tackle", "Thunderbolt"]
-   },
-   "Charizard": {
-       name: "Charizard",
-       type: "Fire",
-       hp: 120,
-       attack: 12,
-       speed: 10,
-       moves: ["Growl", "Tackle", "Flamethrower"]
-   },
-   // Add more Pokémon as needed
-};
+let playerPokemon = pokemonData["Pikachu"];
+let enemyPokemon = pokemonData["Charizard"];
 
-// Select Pokémon for the player and the enemy
-const playerPokemon = pokemonData["Pikachu"];
-const enemyPokemon = pokemonData["Charizard"];
+function updatePokemonHp() {
+    const playerCard = document.getElementById("player-card");
+    const enemyCard = document.getElementById("enemy-card");
 
-// Function to simulate a turn in the battle
-function battleTurn(player, enemy) {
-   console.log(`${player.name} vs ${enemy.name}`);
-   
-   // Player's turn
-   if (checkStatus(player)) return;  // Check if the player can attack (status effects)
-   const playerMove = chooseMove(player, enemy);
-   executeMove(playerMove, player, enemy);
-   
-   // Enemy's turn (AI logic)
-   if (checkStatus(enemy)) return;  // Check if the enemy can attack (status effects)
-   aiTurn(enemy, player);
+    playerCard.innerHTML = `
+        <img src="${playerPokemon.image}" alt="${playerPokemon.name}">
+        <h3>${playerPokemon.name}</h3>
+        <p>HP: ${playerPokemon.hp}</p>
+    `;
+    
+    enemyCard.innerHTML = `
+        <img src="${enemyPokemon.image}" alt="${enemyPokemon.name}">
+        <h3>${enemyPokemon.name}</h3>
+        <p>HP: ${enemyPokemon.hp}</p>
+    `;
 }
 
-// Start the battle
-battleTurn(playerPokemon, enemyPokemon);
+function battleTurn(player, enemy) {
+    // Simulate attack (basic attack logic)
+    const damage = 10;  // For simplicity, a fixed damage value
+    enemy.hp -= damage;
+    
+    if (enemy.hp <= 0) {
+        alert(`${player.name} wins!`);
+        enemy.hp = 0;
+    }
+
+    updatePokemonHp();
+}
+
+document.getElementById("attack-btn").addEventListener("click", () => {
+    battleTurn(playerPokemon, enemyPokemon);
+});
