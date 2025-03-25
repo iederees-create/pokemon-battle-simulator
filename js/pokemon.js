@@ -1,6 +1,6 @@
 // Pok‚mon data and functions 
 const POKEMON_LIST = [
-    { name: "Pikachu", image: "pikachu.png", hp: 100, attack: 15 },
+    { name: "Pikachu", image: "assets/images/pikachu/pikachu_1.png", hp: 100, attack: 15 },
     { name: "Charizard", image: "charizard.png", hp: 120, attack: 20 },
     { name: "Bulbasaur", image: "bulbasaur.png", hp: 90, attack: 10 }
 ];
