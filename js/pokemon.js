@@ -1,106 +1,93 @@
-// Pokémon Data - Define Pokémon with names, images, and stats
-const pokemonList = [
-    {
-        name: "Pikachu",
-        image: "assets/images/pikachu/pikachu_1.png",
-        health: 100,
-        attack: 15
-    },
-    {
-        name: "Charmander",
-        image: "assets/images/charmander/charmander_1.png",
-        health: 100,
-        attack: 18
-    },
-    {
-        name: "Squirtle",
-        image: "assets/images/squirtle/squirtle_1.png",
-        health: 110,
-        attack: 12
-    },
-    {
-        name: "Bulbasaur",
-        image: "assets/images/bulbasaur/bulbasaur_1.png",
-        health: 120,
-        attack: 10
-    }
-];
+// pokemon.js - Define Pokémon data and battle logic
 
-// Function to load Pokémon dynamically
-function loadPokemonSelection() {
-    const container = document.getElementById("pokemon-container");
+const typeChart = {
+   "Fire": ["Grass", "Bug", "Ice"],
+   "Water": ["Fire", "Ground", "Rock"],
+   "Electric": ["Water", "Flying"],
+   "Grass": ["Water", "Ground", "Rock"],
+   // Add other types as needed
+};
 
-    pokemonList.forEach((pokemon, index) => {
-        const card = document.createElement("div");
-        card.classList.add("pokemon-card");
-        card.innerHTML = `
-            <img src="${pokemon.image}" alt="${pokemon.name}" width="100">
-            <h3>${pokemon.name}</h3>
-            <p>Health: ${pokemon.health}</p>
-            <p>Attack: ${pokemon.attack}</p>
-            <button onclick="selectPokemon(${index})">Select</button>
-        `;
-        container.appendChild(card);
-    });
+const moves = {
+   "Growl": { effect: "lowerAttack", target: "enemy" },
+   "Tackle": { effect: "normalDamage", target: "enemy" },
+   "Thunderbolt": { effect: "signatureMove", target: "enemy" },
+   "Flamethrower": { effect: "signatureMove", target: "enemy" },
+   // Add other moves as needed
+};
+
+function calculateDamage(attacker, defender) {
+   const attackerType = attacker.type;
+   const defenderType = defender.type;
+   
+   // Check for type advantages
+   if (typeChart[attackerType] && typeChart[attackerType].includes(defenderType)) {
+       return 2; // Double damage for type advantage
+   }
+   return 1; // Normal damage
 }
 
-// Variables to store selected Pokémon
-let playerPokemon = null;
-let enemyPokemon = null;
-
-// Function to select Pokémon
-function selectPokemon(index) {
-    playerPokemon = pokemonList[index];
-    enemyPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
-
-    if (enemyPokemon === playerPokemon) {
-        enemyPokemon = pokemonList[(index + 1) % pokemonList.length]; // Ensure different enemy
-    }
-
-    startBattle();
+// Apply status effects like sleep or paralysis
+function applyStatusEffect(pokemon, effect) {
+   pokemon.status = effect;
 }
 
-// Function to start battle
-function startBattle() {
-    document.body.innerHTML = `
-        <h1>Battle Begins!</h1>
-        <div class="battle-pokemon">
-            <div>
-                <h2>You</h2>
-                <img id="player" src="${playerPokemon.image}" alt="${playerPokemon.name}">
-                <p>Health: <span id="player-health">${playerPokemon.health}</span></p>
-            </div>
-            <div>
-                <h2>Opponent</h2>
-                <img id="enemy" src="${enemyPokemon.image}" alt="${enemyPokemon.name}">
-                <p>Health: <span id="enemy-health">${enemyPokemon.health}</span></p>
-            </div>
-        </div>
-        <button id="attack-btn" onclick="attack()">Attack!</button>
-    `;
+function checkStatus(pokemon) {
+   if (pokemon.status === "sleep") {
+       console.log(`${pokemon.name} is asleep!`);
+       return true; // Can't attack
+   }
+   if (pokemon.status === "paralyze" && Math.random() < 0.25) {
+       console.log(`${pokemon.name} is paralyzed and couldn't move!`);
+       return true; // 25% chance to skip turn due to paralysis
+   }
+   return false; // No effect
 }
 
-// Function to handle attack logic
-function attack() {
-    // Player attacks enemy
-    enemyPokemon.health -= playerPokemon.attack;
-    document.getElementById("enemy-health").textContent = enemyPokemon.health;
-
-    if (enemyPokemon.health <= 0) {
-        alert(`${playerPokemon.name} wins!`);
-        location.reload(); // Restart game
-        return;
-    }
-
-    // Enemy attacks player
-    playerPokemon.health -= enemyPokemon.attack;
-    document.getElementById("player-health").textContent = playerPokemon.health;
-
-    if (playerPokemon.health <= 0) {
-        alert(`${enemyPokemon.name} wins!`);
-        location.reload(); // Restart game
-    }
+// Compare speed between two Pokémon to decide attack order
+function compareSpeed(pokemon1, pokemon2) {
+   if (pokemon1.speed > pokemon2.speed) {
+       return pokemon1;
+   } else {
+       return pokemon2;
+   }
 }
 
-// Load Pokémon selection when page loads
-window.onload = loadPokemonSelection;
+// Execute the chosen move
+function executeMove(move, attacker, defender) {
+   if (move.effect === "lowerAttack") {
+       defender.attack -= 1; // Lower the opponent's attack
+   }
+   if (move.effect === "normalDamage") {
+       const damage = calculateDamage(attacker, defender);
+       defender.hp -= damage;
+       console.log(`${attacker.name} dealt ${damage} damage to ${defender.name}`);
+   }
+   if (move.effect === "signatureMove") {
+       if (attacker.name === "Pikachu") {
+           console.log(`${attacker.name} uses Thunderbolt!`);
+           defender.hp -= 20;
+       }
+       if (attacker.name === "Charizard") {
+           console.log(`${attacker.name} uses Flamethrower!`);
+           defender.hp -= 25;
+       }
+   }
+}
+
+// Handle AI decision-making for the enemy Pokémon
+function aiTurn(pokemon, opponent) {
+   if (pokemon.hp < pokemon.maxHp * 0.3) {
+       console.log(`${pokemon.name} is low on health! Using a healing move.`);
+       pokemon.hp += 20; // Heal 20 HP if low on health
+   } else {
+       const move = chooseMove(pokemon, opponent);
+       executeMove(move, pokemon, opponent);
+   }
+}
+
+// Example function to select a move (based on strategy or randomness)
+function chooseMove(pokemon, opponent) {
+   const randomMove = pokemon.moves[Math.floor(Math.random() * pokemon.moves.length)];
+   return moves[randomMove];
+}
